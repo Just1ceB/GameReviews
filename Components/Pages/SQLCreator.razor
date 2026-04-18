@@ -1,0 +1,147 @@
+﻿@page "/REGISTER"
+@using MySql.Data.MySqlClient;
+
+<PageTitle>SQL Manager - Sign Up</PageTitle>
+
+<style>
+    /* עיצוב רקע הדף */
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #333;
+    }
+
+    /* תיבת ההרשמה הלבנה */
+    .signup-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    p {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
+    /* עיצוב שדות הקלט */
+    input {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #dcdde1;
+        border-radius: 8px;
+        box-sizing: border-box;
+        background-color: #fafafa;
+        color: #2f3640;
+        font-size: 15px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        /* אפקט כשלוחצים על שדה */
+        input:focus {
+            border-color: #3498db;
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+        }
+
+    /* עיצוב הכפתור */
+    button {
+        width: 100%;
+        background-color: #3498db;
+        color: white;
+        padding: 14px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: background-color 0.3s ease;
+    }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+    /* עיצוב הקישור למטה */
+    .back-link {
+        display: block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="signup-container">
+    <h2>@done</h2>
+    <p>Please enter your details to register</p>
+
+    <input type="text" @bind="name" placeholder="Full Name" />
+    <input type="text" @bind="email" placeholder="Email Address" />
+    <input type="number" @bind="birthYear" placeholder="Birth Year" />
+    <input type="password" @bind="password" placeholder="Password" />
+
+    <button @onclick="AddUser">SIGN UP</button> <br />
+    <a href="/" class="back-link">יש לי כבר משתמש</a>
+</div>
+
+@code {
+    // הלוגיקה נשארה ללא שינוי בכלל
+    MySqlConnection sqlCon = new MySqlConnection();
+    MySqlCommand cmd = new MySqlCommand();
+
+    string done;
+    string name;
+    string password;
+    string email;
+    int birthYear;
+    uint id;
+
+    protected override void OnInitialized()
+    {
+        done = "Welcome!";
+        sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
+        cmd.Connection = sqlCon;
+        sqlCon.Open();
+    }
+    
+    void AddUser()
+    {
+        cmd.CommandText = $"INSERT INTO `classproject`.`users` (`userPassword`, `userName`, `userEmail`, `birthYear`) VALUES ('{password}', '{name}', '{email}', '{birthYear}');";
+        done = cmd.ExecuteNonQuery() > 0 ? "Registered!" : "Failed D:";
+        name = null;
+        password = null;
+        email = null;
+        birthYear = 0;
+    }
+}

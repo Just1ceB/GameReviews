@@ -1,0 +1,128 @@
+﻿@page "/USERSLIST"
+@using MySql.Data.MySqlClient;
+
+<PageTitle>SQL Manager - Show Data</PageTitle>
+
+<style>
+    /* עיצוב רקע הדף */
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* שיניתי למרכז כדי שזה יישב בול באמצע */
+        height: 100vh; /* גובה מסך מלא */
+        margin: 0;
+        padding: 0;
+        color: #333;
+        /* הפקודה שמעלימה את פס הגלילה */
+        overflow: hidden;
+    }
+
+    /* מיכל הטבלה */
+    .table-container {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 90%;
+        max-width: 900px;
+        border: 1px solid #e0e0e0;
+        /* אם הטבלה תהיה גדולה מדי, רק בתוכה יהיה גלגל קטן */
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    /* עיצוב הטבלה */
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .custom-table th {
+            background-color: #f8f9fa;
+            color: #7f8c8d;
+            padding: 15px;
+            border-bottom: 2px solid #eee;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .custom-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f1f1;
+            font-size: 0.95rem;
+        }
+
+        .custom-table tr:hover {
+            background-color: #f9fbff;
+        }
+
+    .back-btn {
+        display: inline-block;
+        color: #9b59b6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>
+
+<div class="table-container">
+    <h2>Registered Users Database</h2>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Birth Year</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @while (reader.Read())
+            {
+                name = reader["userName"].ToString();
+                email = reader["userEmail"].ToString();
+                id = uint.Parse(reader["userID"].ToString());
+                birthYear = int.Parse(reader["birthYear"].ToString());
+                <tr>
+                    <td><strong>#@id</strong></td>
+                    <td>@name</td>
+                    <td>@email</td>
+                    <td>@birthYear</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="/" class="back-btn">← Back to Dashboard</a>
+</div>
+
+@code {
+    MySqlConnection sqlCon = new MySqlConnection();
+    MySqlCommand cmd = new MySqlCommand();
+    MySqlDataReader reader;
+    string name;
+    string email;
+    int birthYear;
+    uint id;
+
+    protected override void OnInitialized()
+    {
+        sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
+        cmd.Connection = sqlCon;
+        sqlCon.Open();
+
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users`;";
+        reader = cmd.ExecuteReader();
+    }
+}

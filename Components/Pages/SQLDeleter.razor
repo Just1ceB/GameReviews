@@ -1,0 +1,171 @@
+﻿@page "/DELETE"
+@using MySql.Data.MySqlClient;
+
+<PageTitle>SQL Manager - Delete User</PageTitle>
+
+<style>
+    /* עיצוב רקע הדף */
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #333;
+    }
+
+    /* תיבת המחיקה */
+    .delete-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 380px;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        color: #c0392b; /* צבע אדום לכותרת */
+        font-weight: 600;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
+    /* עיצוב שדות הקלט */
+    input {
+        width: 100%;
+        padding: 12px 15px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #dcdde1;
+        border-radius: 8px;
+        box-sizing: border-box;
+        background-color: #fafafa;
+        color: #2f3640;
+        font-size: 15px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    input:focus {
+        border-color: #e74c3c; /* אדום במיקוד */
+        background-color: #fff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(231, 76, 60, 0.2);
+    }
+
+    /* עיצוב כפתור המחיקה */
+    button {
+        width: 100%;
+        background-color: #e74c3c;
+        color: white;
+        padding: 14px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #c0392b;
+    }
+
+    /* הצגת תוצאה */
+    .result-msg {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: bold;
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* עיצוב הקישור למטה */
+    .back-link {
+        display: block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="delete-container">
+    <h2>Delete Account</h2>
+    <p class="subtitle">Enter your ID and password to remove your account</p>
+
+    <input type="number" @bind="id" @onblur="UpdatePassword" placeholder="Enter your ID"/>
+
+    @if (id != 0)
+    {
+        <input type="password" @bind="checkPassword" placeholder="Enter password to confirm"/>
+
+        if (checkPassword == password)
+        {
+            <button @onclick="DeleteUser">DELETE USER PERMANENTLY</button>
+        }
+    }
+
+    @if (!string.IsNullOrEmpty(result))
+    {
+        <div class="result-msg">@result</div>
+    }
+
+    <a href="/" class="back-link">חזרה לדף הבית</a>
+</div>
+
+@code {
+    // הלוגיקה שלך ללא שינוי
+    MySqlConnection sqlCon = new MySqlConnection();
+    MySqlCommand cmd = new MySqlCommand();
+
+    string checkPassword;
+    string name;
+    string password;
+    string email;
+    int birthYear;
+    uint id;
+    string result;
+
+    protected override void OnInitialized()
+    {
+        sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
+        cmd.Connection = sqlCon;
+        sqlCon.Open();
+    }
+
+    void UpdatePassword()
+    {
+        MySqlDataReader reader;
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            password = reader["userPassword"].ToString();
+        }
+        reader.Close();
+    }
+
+    void DeleteUser()
+    {
+        cmd.CommandText = $"DELETE FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        result = cmd.ExecuteNonQuery() > 0 ? "Deleted Successfully" : "Deletion Failed";
+    }
+}
