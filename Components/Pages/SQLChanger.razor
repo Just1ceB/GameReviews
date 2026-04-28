@@ -1,4 +1,4 @@
-﻿@page "/DATACHANGE"
+﻿@page "/DATACHANGE/{logInEmail}&{logInPass}"
 @using MySql.Data.MySqlClient;
 
 <PageTitle>SQL Manager - Data Change</PageTitle>
@@ -92,6 +92,12 @@
         font-weight: 500;
     }
 
+    .subtitle {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+    }
+
         .back-link:hover {
             text-decoration: underline;
         }
@@ -107,28 +113,16 @@
     }
 </style>
 
-<div class="change-container>
+<div class="change-container">
     <h2>Sign in</h2>
-    <p class="subtitle">Please enter your details to sign in</p>
+    <p class="subtitle">Change Data:</p>
 
-    <input type="number" @bind="id" @onblur="UpdateDisplay" placeholder="Enter your ID" />
+    <input type="text" @bind-value="name" placeholder="Your name" />
+    <input type="text" @bind-value="email" placeholder="Email Address" />
+    <input type="number" @bind-value="birthYear" placeholder="Birth Year" />
+    <input type="password" @bind-value="password" placeholder="New Password" />
 
-    @if (id != 0)
-    {
-        <input type="password" @bind="checkPassword" placeholder="Enter current password to unlock" />
-
-        if (checkPassword == currentPassword)
-        {
-            <div class="info-text">ID and Password Verified. You can now edit your details:</div>
-
-            <input type="text" @bind-value="name" placeholder="Your name" />
-            <input type="text" @bind-value="email" placeholder="Email Address" />
-            <input type="number" @bind-value="birthYear" placeholder="Birth Year" />
-            <input type="password" @bind-value="password" placeholder="New Password" />
-
-            <button @onclick="ChangeData">UPDATE SETTINGS</button>
-        }
-    }
+    <button @onclick="ChangeData">UPDATE SETTINGS</button>
 
     <a href="/" class="back-link">חזרה לדף הבית</a>
 </div>
@@ -145,11 +139,15 @@
     int birthYear;
     uint id;
 
+    [Parameter] public string logInEmail { get; set; }
+    [Parameter] public string logInPass { get; set; }
+
     protected override void OnInitialized()
     {
         sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
         cmd.Connection = sqlCon;
         sqlCon.Open();
+        UpdateDisplay();
     }
 
     void UpdateDisplay()

@@ -1,5 +1,5 @@
 
-@page "/DATACHANGE"
+@page "/SIGNIN"
 @using MySql.Data.MySqlClient;
 
 <PageTitle>SQL Manager - Data Change</PageTitle>
@@ -69,6 +69,58 @@
             box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
         }
 
+
+    /* עיצוב כללי לכפתורי הניווט */
+    .menu-button {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin: 12px 0;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        /* אפקט ריחף כללי */
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    /* כפתור SIGN UP - כחול */
+    .btn-signup {
+        background-color: #3498db;
+        color: white;
+    }
+
+        .btn-signup:hover {
+            background-color: #2980b9;
+        }
+
+    /* כפתור CHANGE DATA - ירוק */
+    .btn-change {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+        .btn-change:hover {
+            background-color: #27ae60;
+        }
+
+    /* כפתור DELETE USER - אדום */
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
     /* עיצוב הכפתור */
     button {
         width: 100%;
@@ -114,25 +166,24 @@
     }
 </style>
 
-<div class="change-container>
-    <h2>Sign in</h2>
+<div class="change-container">
+    <h2>Sign in </h2>
     <p class="subtitle">Please enter your details to sign in</p>
 
-    <input type="number" @bind="id" @onblur="UpdateDisplay" placeholder="Enter your ID" />
+    <input type="text" @bind="email" @onblur="UpdateDisplay" placeholder="Enter your email" />
 
-    @if (id != 0)
+    @if (email != null)
     {
         <input type="password" @bind="checkPassword" placeholder="Enter current password to unlock" />
 
-        if (checkPassword == currentPassword)
+        if (checkPassword == currentPassword && showButtons)
         {
-            <div class="info-text">ID and Password Verified. You can now:</div>
+            <div class="info-text">Email and Password Verified. You can now:</div>
 
-            <button @onclick="ChangeData">Change Data</button>
-            <button @onclick="ChangeData">Add review</button>
+            <NavLink href="@($"/DATACHANGE/{email}&{currentPassword}")" class="menu-button btn-signup">Change data </NavLink>
+            <a href="/REVIEWS" class="menu-button btn-change">Add a review</a>
+            <a href="/DELETE" class="menu-button btn-delete">Delete User</a>
 
-            <a href="/DATACHANGE" class="menu-button btn-change">Sign In</a>
-            
         }
     }
 
@@ -144,6 +195,7 @@
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
 
+    bool showButtons;
     string checkPassword, currentPassword;
     string name;
     string password;
@@ -161,7 +213,7 @@
     void UpdateDisplay()
     {
         MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -170,45 +222,9 @@
             id = uint.Parse(reader["userID"].ToString());
             currentPassword = reader["userPassword"].ToString();
             birthYear = int.Parse(reader["birthYear"].ToString());
+            showButtons = true;
         }
         reader.Close();
         password = null;
-    }
-
-    void ChangeData()
-    {
-        ChangeName();
-        ChangeEmail();
-        ChangeBirthYear();
-        ChangePassword();
-        UpdateDisplay();
-        checkPassword = null;
-    }
-
-    void ChangeName()
-    {
-        cmd.CommandText = $"UPDATE `classproject`.`users` SET `userName` = '{name}' WHERE (`userID` = '{id}');";
-        cmd.ExecuteNonQuery();
-    }
-
-    void ChangeEmail()
-    {
-        cmd.CommandText = $"UPDATE `classproject`.`users` SET `userEmail` = '{email}' WHERE (`userID` = '{id}');";
-        cmd.ExecuteNonQuery();
-    }
-
-    void ChangeBirthYear()
-    {
-        cmd.CommandText = $"UPDATE `classproject`.`users` SET `birthYear` = '{birthYear}' WHERE (`userID` = '{id}');";
-        cmd.ExecuteNonQuery();
-    }
-
-    void ChangePassword()
-    {
-        if (password != "")
-        {
-            cmd.CommandText = $"UPDATE `classproject`.`users` SET `userPassword` = '{password}' WHERE (`userID` = '{id}');";
-            cmd.ExecuteNonQuery();
-        }
     }
 }

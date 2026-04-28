@@ -109,11 +109,11 @@
 
 <div class="delete-container">
     <h2>Delete Account</h2>
-    <p class="subtitle">Enter your ID and password to remove your account</p>
+    <p class="subtitle">Enter your email and password to remove your account</p>
 
-    <input type="number" @bind="id" @onblur="UpdatePassword" placeholder="Enter your ID"/>
+    <input type="text" @bind="email" @onblur="UpdatePassword" placeholder="Enter your email"/>
 
-    @if (id != 0)
+    @if (email != null)
     {
         <input type="password" @bind="checkPassword" placeholder="Enter password to confirm"/>
 
@@ -154,7 +154,7 @@
     void UpdatePassword()
     {
         MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -165,7 +165,7 @@
 
     void DeleteUser()
     {
-        cmd.CommandText = $"DELETE FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        cmd.CommandText = $"DELETE FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
         result = cmd.ExecuteNonQuery() > 0 ? "Deleted Successfully" : "Deletion Failed";
     }
 }
