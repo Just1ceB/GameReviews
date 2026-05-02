@@ -1,0 +1,146 @@
+@page "/ADDREVIEWPANEL/{logInEmail}&{logInPass}&{gameID}"
+@using MySql.Data.MySqlClient;
+
+<PageTitle>Games Reviews - Add review</PageTitle>
+
+<style>
+    /* עיצוב רקע הדף */
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* שיניתי למרכז כדי שזה יישב בול באמצע */
+        height: 100vh; /* גובה מסך מלא */
+        margin: 0;
+        padding: 0;
+        color: #333;
+        /* הפקודה שמעלימה את פס הגלילה */
+        overflow: hidden;
+    }
+
+    /* מיכל הטבלה */
+    .table-container {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: 90%;
+        max-width: 900px;
+        border: 1px solid #e0e0e0;
+        /* אם הטבלה תהיה גדולה מדי, רק בתוכה יהיה גלגל קטן */
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .add-review-btn {
+    background-color: #9b59b6;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.3s;
+    }
+
+    .add-review-btn:hover {
+        background-color: #8e44ad;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    
+    .back-btn {
+        display: inline-block;
+        color: #9b59b6;
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>
+
+<div class="table-container">
+
+    <h2>Add a review:</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: 15px; align-items: center; margin-bottom: 25px;">
+        <div style="display: flex; flex-direction: column; width: 100%; max-width: 300px;">
+            <label style="margin-bottom: 8px; color: #7f8c8d; font-size: 0.9rem;">Rate from 0 to 10:</label>
+            <input type="number" 
+                   min="0" 
+                   max="10" 
+                   @bind-value=@userReview 
+                   style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 1rem;" />
+        </div>
+        @if (!reviewed)
+        {
+            <button class="add-review-btn" 
+                    style="width: 100%; max-width: 300px; padding: 12px; font-weight: 600;" 
+                    @onclick="AddReview">
+                    Confirm Review
+            </button>
+        }
+        else
+        {
+            <NavLink href="@($"/ADDREVIEW/{logInEmail}&{logInPass}")" class="add-review-btn" style="width: 100%; max-width: 300px; padding: 12px; font-weight: 600;">Return to table</NavLink>
+        }
+    </div>
+
+    <NavLink href="@($"/ADDREVIEW/{logInEmail}&{logInPass}")" class="menu-button back-btn">back</NavLink>
+</div>
+
+@code
+{
+    MySqlConnection sqlCon = new MySqlConnection();
+    MySqlCommand cmd = new MySqlCommand();
+    MySqlDataReader reader;
+
+    int userReview = 0;
+    int reviewsAmount;
+    double reviewSum;
+    double lastRevVal;
+    bool reviewed = false;
+
+    [Parameter] public string logInEmail { get; set; }
+    [Parameter] public string logInPass { get; set; }
+    [Parameter] public string gameID { get; set; }
+
+    protected override void OnInitialized()
+    {
+        sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
+        cmd.Connection = sqlCon;
+        sqlCon.Open();
+        cmd.CommandText = $"SELECT * FROM `classproject`.`games` WHERE(`gameID` = '{int.Parse(gameID)}');";
+        reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            reviewsAmount = int.Parse(reader["reviewsAmount"].ToString());
+            lastRevVal = double.Parse(reader["gameReview"].ToString());
+        }
+        reader.Close();
+    }
+
+    void AddReview()
+    {
+        string finalReview;
+        reviewSum = lastRevVal * reviewsAmount;
+        reviewsAmount++;
+        reviewSum = reviewSum + userReview;
+        /* finalReview = $"{((double)reviewSum / (double)reviewsAmount):0.##}"; */
+        finalReview = $"{(reviewSum / reviewsAmount):0.##}";
+        cmd.CommandText = $"UPDATE `classproject`.`games` SET `gameReview` = '{finalReview}' WHERE (`gameID` = '{int.Parse(gameID)}');";
+        cmd.ExecuteNonQuery();
+        cmd.CommandText = $"UPDATE `classproject`.`games` SET `reviewsAmount` = '{reviewsAmount}' WHERE (`gameID` = '{int.Parse(gameID)}');";
+        cmd.ExecuteNonQuery();
+        reviewed = true;
+    }
+}

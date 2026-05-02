@@ -1,8 +1,8 @@
+@page "/SIGNEDIN/{logInEmail}&{logInPass}"
 
-@page "/SIGNIN"
 @using MySql.Data.MySqlClient;
 
-<PageTitle>Games Reviews - Sign in</PageTitle>
+<PageTitle>Games Reviews - Options panel</PageTitle>
 
 <style>
     /* עיצוב רקע הדף */
@@ -47,29 +47,6 @@
         color: white;
     }
 
-    /* עיצוב שדות הקלט */
-    input {
-        width: 100%;
-        padding: 12px 15px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #dcdde1;
-        border-radius: 8px;
-        box-sizing: border-box;
-        background-color: #fafafa;
-        color: #2f3640;
-        font-size: 15px;
-        transition: all 0.2s ease-in-out;
-    }
-
-        input:focus {
-            border-color: #2ecc71; /* צבע ירוק במיקוד */
-            background-color: #fff;
-            outline: none;
-            box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
-        }
-
-
     /* עיצוב כללי לכפתורי הניווט */
     .menu-button {
         display: block;
@@ -99,6 +76,26 @@
 
         .btn-signup:hover {
             background-color: #2980b9;
+        }
+
+    /* כפתור CHANGE DATA - ירוק */
+    .btn-change {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+        .btn-change:hover {
+            background-color: #27ae60;
+        }
+
+    /* כפתור DELETE USER - אדום */
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
         }
 
     /* עיצוב הכפתור */
@@ -144,63 +141,43 @@
         font-size: 0.85rem;
         margin-bottom: 15px;
     }
+
 </style>
 
 <div class="change-container">
-    <h2>Sign in </h2>
-    <p class="subtitle">Please enter your details to sign in</p>
+    <h2>Hello @name</h2>
+    <p class="subtitle">Please choose what you want to do</p>
 
-    <input type="text" @bind="email" @onblur="UpdateDisplay" placeholder="Enter your email" />
+    <NavLink href="@($"/DATACHANGE/{logInEmail}&{logInPass}")" class="menu-button btn-signup">Change data </NavLink>
+    <NavLink href="@($"/ADDREVIEW/{logInEmail}&{logInPass}")" class="menu-button btn-change">Add review</NavLink>
+    <NavLink href="@($"/DELETE/{logInEmail}&{logInPass}")" class="menu-button btn-delete">Delete user</NavLink>
 
-    @if (email != null)
-    {
-        <input type="password" @bind="checkPassword" placeholder="Enter current password to unlock" />
-
-        if (checkPassword == currentPassword && showButtons)
-        {
-            <div class="info-text">Email and Password Verified.</div>
-
-            <NavLink href="@($"/SIGNEDIN/{email}&{currentPassword}")" class="menu-button btn-signup">SIGN IN</NavLink>
-        }
-    }
-
-    <a href="/" class="back-link">to homepage</a>
+    <a href="/" class="back-link">logout</a>
 </div>
 
-@code {
+@code
+{
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
 
-    bool showButtons;
-    string checkPassword, currentPassword;
     string name;
-    string password;
-    string email;
-    int birthYear;
-    uint id;
+
+    [Parameter] public string logInEmail { get; set; }
+    [Parameter] public string logInPass { get; set; }
 
     protected override void OnInitialized()
     {
         sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
         cmd.Connection = sqlCon;
         sqlCon.Open();
-    }
-
-    void UpdateDisplay()
-    {
         MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{logInEmail}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
             name = reader["userName"].ToString();
-            email = reader["userEmail"].ToString();
-            id = uint.Parse(reader["userID"].ToString());
-            currentPassword = reader["userPassword"].ToString();
-            birthYear = int.Parse(reader["birthYear"].ToString());
-            showButtons = true;
         }
         reader.Close();
-        password = null;
+        sqlCon.Close();
     }
 }

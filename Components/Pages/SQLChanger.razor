@@ -1,7 +1,7 @@
 ﻿@page "/DATACHANGE/{logInEmail}&{logInPass}"
 @using MySql.Data.MySqlClient;
 
-<PageTitle>SQL Manager - Data Change</PageTitle>
+<PageTitle>Games Reviews - Change info</PageTitle>
 
 <style>
     /* עיצוב רקע הדף */
@@ -114,28 +114,30 @@
 </style>
 
 <div class="change-container">
-    <h2>Sign in</h2>
-    <p class="subtitle">Change Data:</p>
+    <h2>Change Data</h2>
+    <p class="subtitle">@subtitle</p>
 
-    <input type="text" @bind-value="name" placeholder="Your name" />
-    <input type="text" @bind-value="email" placeholder="Email Address" />
-    <input type="number" @bind-value="birthYear" placeholder="Birth Year" />
-    <input type="password" @bind-value="password" placeholder="New Password" />
+    <input type="text" @bind-value=@name placeholder="Your name" />
+    <input type="text" @bind-value=@newEmail placeholder="Email Address" />
+    <input type="number" @bind-value=@birthYear placeholder="Birth Year" />
+    <input type="password" @bind-value=@password placeholder="New Password" />
 
     <button @onclick="ChangeData">UPDATE SETTINGS</button>
-
-    <a href="/" class="back-link">חזרה לדף הבית</a>
+    
+    <NavLink href="@($"/SIGNEDIN/{email}&{currentPassword}")" class="back-link">back</NavLink>
 </div>
 
 @code {
-    // הלוגיקה המקורית שלך נשארה ללא שום שינוי
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
+    MySqlDataReader reader;
 
-    string checkPassword, currentPassword;
+    string currentPassword;
     string name;
     string password;
     string email;
+    string subtitle = "Change your data";
+    string newEmail;
     int birthYear;
     uint id;
 
@@ -153,7 +155,7 @@
     void UpdateDisplay()
     {
         MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{id}');";
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{logInEmail}' AND `userPassword` = '{logInPass}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -164,17 +166,46 @@
             birthYear = int.Parse(reader["birthYear"].ToString());
         }
         reader.Close();
+        newEmail = email;
         password = null;
+    }
+
+    bool IsEmailUnique()
+    {
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users`;";
+        reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            if (reader["userEmail"].ToString() == email)
+            {
+                reader.Close();
+                return false;
+            }
+        }
+
+        reader.Close();
+        return true;
     }
 
     void ChangeData()
     {
-        ChangeName();
-        ChangeEmail();
-        ChangeBirthYear();
-        ChangePassword();
-        UpdateDisplay();
-        checkPassword = null;
+        if (IsEmailUnique() || newEmail == email)
+        {
+            ChangeName();
+            ChangeEmail();
+            ChangeBirthYear();
+            if (password != null)
+            {
+                ChangePassword();
+            }
+            UpdateDisplay();
+            subtitle = "Data changed!";
+        }
+        else
+        {
+            subtitle = "That email is already taken, sorry!";
+        }
     }
 
     void ChangeName()
@@ -185,7 +216,7 @@
 
     void ChangeEmail()
     {
-        cmd.CommandText = $"UPDATE `classproject`.`users` SET `userEmail` = '{email}' WHERE (`userID` = '{id}');";
+        cmd.CommandText = $"UPDATE `classproject`.`users` SET `userEmail` = '{newEmail}' WHERE (`userID` = '{id}');";
         cmd.ExecuteNonQuery();
     }
 

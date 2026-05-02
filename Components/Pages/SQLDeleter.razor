@@ -1,7 +1,7 @@
-﻿@page "/DELETE"
+﻿@page "/DELETE/{logInEmail}&{logInPass}"
 @using MySql.Data.MySqlClient;
 
-<PageTitle>SQL Manager - Delete User</PageTitle>
+<PageTitle>Games Reviews - Delete User</PageTitle>
 
 <style>
     /* עיצוב רקע הדף */
@@ -117,22 +117,28 @@
     {
         <input type="password" @bind="checkPassword" placeholder="Enter password to confirm"/>
 
-        if (checkPassword == password)
+        if (checkPassword == password && showButton)
         {
             <button @onclick="DeleteUser">DELETE USER PERMANENTLY</button>
         }
     }
 
-    @if (!string.IsNullOrEmpty(result))
+    @if (result != null)
     {
         <div class="result-msg">@result</div>
     }
-
-    <a href="/" class="back-link">חזרה לדף הבית</a>
+    
+    @if (!deleted)
+    {
+        <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}")" class="back-link">back</NavLink>
+    }
+    else
+    {
+        <a href="/" class="back-link">Go back to homepage</a>
+    }
 </div>
 
 @code {
-    // הלוגיקה שלך ללא שינוי
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
 
@@ -143,6 +149,11 @@
     int birthYear;
     uint id;
     string result;
+    bool deleted = false;
+    bool showButton = false;
+
+    [Parameter] public string logInEmail { get; set; }
+    [Parameter] public string logInPass { get; set; }
 
     protected override void OnInitialized()
     {
@@ -161,11 +172,14 @@
             password = reader["userPassword"].ToString();
         }
         reader.Close();
+        showButton = true;
     }
 
     void DeleteUser()
     {
         cmd.CommandText = $"DELETE FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
         result = cmd.ExecuteNonQuery() > 0 ? "Deleted Successfully" : "Deletion Failed";
+        deleted = true;
+        showButton = false;
     }
 }
