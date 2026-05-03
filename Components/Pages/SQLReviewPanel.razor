@@ -132,10 +132,10 @@
     void AddReview()
     {
         string finalReview;
+        if (userReview >= 0 && userReview <= 10)
         reviewSum = lastRevVal * reviewsAmount;
         reviewsAmount++;
         reviewSum = reviewSum + userReview;
-        /* finalReview = $"{((double)reviewSum / (double)reviewsAmount):0.##}"; */
         finalReview = $"{(reviewSum / reviewsAmount):0.##}";
         cmd.CommandText = $"UPDATE `classproject`.`games` SET `gameReview` = '{finalReview}' WHERE (`gameID` = '{int.Parse(gameID)}');";
         cmd.ExecuteNonQuery();

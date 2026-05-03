@@ -153,10 +153,14 @@
         reader.Close();
         return true;
     }
-    
+
     void AddUser()
     {   
-        if (!int.TryParse(birthYear, out _)) // I checked how to check if string is can be tranfered to a number so try parsing :D
+        if (!int.TryParse(birthYear, out _))
+        {
+            title = "Invalid birth year";
+        } // Negative year and year in future will fail the registration
+        else if (int.Parse(birthYear) < 0 || DateTime.Now.Year - int.Parse(birthYear) < 0) 
         {
             title = "Invalid birth year";
         }

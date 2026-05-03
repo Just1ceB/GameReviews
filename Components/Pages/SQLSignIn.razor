@@ -170,6 +170,7 @@
 @code {
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
+    MySqlDataReader reader;
 
     bool showButtons;
     string checkPassword, currentPassword;
@@ -188,7 +189,6 @@
 
     void UpdateDisplay()
     {
-        MySqlDataReader reader;
         cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -202,5 +202,20 @@
         }
         reader.Close();
         password = null;
+    }
+
+    string CypherData()
+    {
+        int birthYear;
+        string cypheredData;
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{email}');";
+        reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            birthYear = int.Parse(reader["birthYear"].ToString());
+        }
+        reader.Close();
+
+        return cypheredData;
     }
 }

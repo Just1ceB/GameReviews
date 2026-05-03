@@ -90,43 +90,50 @@
 </style>
 
 <div class="table-container">
-    <h2>Games</h2>
+    @if (userAge > 13)
+    {
+        <h2>Games</h2>
 
-    <table class="custom-table">
-        <thead>
-            <tr>
-                <th>ID: Title</th>
-                <th>Description</th>
-                <th>Release Date</th>
-                <th>Community Review</th>
-            </tr>
-        </thead>
-        <tbody>
-            @while (reader.Read())
-            {
-                gameID = int.Parse(reader["gameID"].ToString()); 
-                title = reader["gameTitle"].ToString();
-                description = reader["gameSummary"].ToString();
-                releaseDate = reader["releaseDate"].ToString();
-                reviews = reader["gameReview"].ToString();
-
+        <table class="custom-table">
+            <thead>
                 <tr>
-                    <td><strong>#@gameID: @title</strong></td>
-                    <td>@description</td>
-                    <td>@releaseDate</td>
-                    <td>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <span>@reviews</span>
-                            <NavLink href="@($"/ADDREVIEWPANEL/{logInEmail}&{logInPass}&{gameID}")" class="add-review-btn">Rate</NavLink>
-                        </div>
-                    </td>
+                    <th>ID: Title</th>
+                    <th>Description</th>
+                    <th>Release Date</th>
+                    <th>Community Review</th>
                 </tr>
-            }
-            @{
-                reader.Close();
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @while (reader.Read())
+                {
+                    gameID = int.Parse(reader["gameID"].ToString()); 
+                    title = reader["gameTitle"].ToString();
+                    description = reader["gameSummary"].ToString();
+                    releaseDate = reader["releaseDate"].ToString();
+                    reviews = reader["gameReview"].ToString();
+
+                    <tr>
+                        <td><strong>#@gameID: @title</strong></td>
+                        <td>@description</td>
+                        <td>@releaseDate</td>
+                        <td>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span>@reviews</span>
+                                <NavLink href="@($"/ADDREVIEWPANEL/{logInEmail}&{logInPass}&{gameID}")" class="add-review-btn">Rate</NavLink>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @{
+                    reader.Close();
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <h1> YOU ARE TOO YOUNG!</h1>
+    }
 
     <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}")" class="menu-button back-btn">back</NavLink>
 </div>
@@ -143,7 +150,8 @@
     int revGameID; // ID of the game to review
     uint id;
     int userReview = 0;
-    
+    int userAge;
+
 
     [Parameter] public string logInEmail { get; set; }
     [Parameter] public string logInPass { get; set; }
@@ -153,6 +161,15 @@
         sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
         cmd.Connection = sqlCon;
         sqlCon.Open();
+
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users`;";
+        reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            userAge = DateTime.Now.Year - int.Parse(reader["birthYear"].ToString());
+        }
+        reader.Close();
 
         cmd.CommandText = $"SELECT * FROM `classproject`.`games`;";
         reader = cmd.ExecuteReader();
