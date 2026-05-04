@@ -1,4 +1,4 @@
-@page "/SIGNEDIN/{logInEmail}&{logInPass}"
+@page "/SIGNEDIN/{logInEmail}&{logInPass}${logInID}"
 
 @using MySql.Data.MySqlClient;
 
@@ -145,33 +145,42 @@
 </style>
 
 <div class="change-container">
-    <h2>Hello @name</h2>
-    <p class="subtitle">Please choose what you want to do</p>
+    @if (name != null)
+    {
+        <h2>Hello @name</h2>
+        <p class="subtitle">Please choose what you want to do</p>
 
-    <NavLink href="@($"/DATACHANGE/{logInEmail}&{logInPass}")" class="menu-button btn-signup">Change data </NavLink>
-    <NavLink href="@($"/ADDREVIEW/{logInEmail}&{logInPass}")" class="menu-button btn-change">Add review</NavLink>
-    <NavLink href="@($"/DELETE/{logInEmail}&{logInPass}")" class="menu-button btn-delete">Delete user</NavLink>
+        <NavLink href="@($"/DATACHANGE/{logInEmail}&{logInPass}${logInID}")" class="menu-button btn-signup">Change data </NavLink>
+        <NavLink href="@($"/ADDREVIEW/{logInEmail}&{logInPass}${logInID}")" class="menu-button btn-change">Add review</NavLink>
+        <NavLink href="@($"/DELETE/{logInEmail}&{logInPass}${logInID}")" class="menu-button btn-delete">Delete user</NavLink>
 
-    <a href="/" class="back-link">logout</a>
+        <a href="/" class="back-link">logout</a>
+    }
+    else
+    {
+        <h1>ERROR: USER DOESN'T EXIST</h1>
+        <a href="/" class="back-link">To Homepage</a>
+    }
 </div>
 
 @code
 {
     MySqlConnection sqlCon = new MySqlConnection();
     MySqlCommand cmd = new MySqlCommand();
+    MySqlDataReader reader;
 
     string name;
 
     [Parameter] public string logInEmail { get; set; }
     [Parameter] public string logInPass { get; set; }
+    [Parameter] public string logInID { get; set; }
 
     protected override void OnInitialized()
     {
         sqlCon.ConnectionString = "server=localhost;user id=root;password=josh17rog;database=classproject;";
         cmd.Connection = sqlCon;
         sqlCon.Open();
-        MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{logInEmail}');";
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{logInID}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -180,4 +189,5 @@
         reader.Close();
         sqlCon.Close();
     }
+    
 }

@@ -1,4 +1,4 @@
-﻿@page "/DELETE/{logInEmail}&{logInPass}"
+﻿@page "/DELETE/{logInEmail}&{logInPass}${logInID}"
 @using MySql.Data.MySqlClient;
 
 <PageTitle>Games Reviews - Delete User</PageTitle>
@@ -115,7 +115,7 @@
 
     @if (email != null)
     {
-        <input type="password" @bind="checkPassword" placeholder="Enter password to confirm"/>
+        <input type="password" @bind="checkPassword" @onblur="ShowButton" placeholder="Enter password to confirm"/>
 
         if (checkPassword == password && showButton)
         {
@@ -130,7 +130,7 @@
     
     @if (!deleted)
     {
-        <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}")" class="back-link">back</NavLink>
+        <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}${logInID}")" class="back-link">back</NavLink>
     }
     else
     {
@@ -154,6 +154,7 @@
 
     [Parameter] public string logInEmail { get; set; }
     [Parameter] public string logInPass { get; set; }
+    [Parameter] public string logInID { get; set; }
 
     protected override void OnInitialized()
     {
@@ -172,7 +173,6 @@
             password = reader["userPassword"].ToString();
         }
         reader.Close();
-        showButton = true;
     }
 
     void DeleteUser()
@@ -181,5 +181,10 @@
         result = cmd.ExecuteNonQuery() > 0 ? "Deleted Successfully" : "Deletion Failed";
         deleted = true;
         showButton = false;
+    }
+
+    void ShowButton()
+    {
+            showButton = true;
     }
 }

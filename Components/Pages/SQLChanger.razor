@@ -1,4 +1,4 @@
-﻿@page "/DATACHANGE/{logInEmail}&{logInPass}"
+﻿@page "/DATACHANGE/{logInEmail}&{logInPass}${logInID}"
 @using MySql.Data.MySqlClient;
 
 <PageTitle>Games Reviews - Change info</PageTitle>
@@ -124,7 +124,7 @@
 
     <button @onclick="ChangeData">UPDATE SETTINGS</button>
     
-    <NavLink href="@($"/SIGNEDIN/{email}&{currentPassword}")" class="back-link">back</NavLink>
+    <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}${logInID}")" class="back-link">back</NavLink>
 </div>
 
 @code {
@@ -140,9 +140,12 @@
     string newEmail;
     int birthYear;
     uint id;
+    string decryptedEmail;
+    string decryptedPass;
 
     [Parameter] public string logInEmail { get; set; }
     [Parameter] public string logInPass { get; set; }
+    [Parameter] public string logInID { get; set; }
 
     protected override void OnInitialized()
     {
@@ -155,7 +158,8 @@
     void UpdateDisplay()
     {
         MySqlDataReader reader;
-        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{logInEmail}' AND `userPassword` = '{logInPass}');";
+        DeCypherData();
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userEmail` = '{decryptedEmail}' AND `userPassword` = '{decryptedPass}');";
         reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -233,5 +237,25 @@
             cmd.CommandText = $"UPDATE `classproject`.`users` SET `userPassword` = '{password}' WHERE (`userID` = '{id}');";
             cmd.ExecuteNonQuery();
         }
+    }
+    
+    int GetBirthYear()
+    {
+        int birthYear = 0;
+        cmd.CommandText = $"SELECT * FROM `classproject`.`users` WHERE(`userID` = '{uint.Parse(logInID)}');";
+        reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            birthYear = int.Parse(reader["birthYear"].ToString());
+        }
+        reader.Close();
+
+        return birthYear;
+    }
+
+    void DeCypherData()
+    {
+        decryptedEmail = Cypher.ShiftCypher(logInEmail, -GetBirthYear());
+        decryptedPass = Cypher.ShiftCypher(logInPass, -GetBirthYear());
     }
 }

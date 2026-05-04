@@ -1,4 +1,4 @@
-@page "/ADDREVIEW/{logInEmail}&{logInPass}"
+@page "/ADDREVIEW/{logInEmail}&{logInPass}${logInID}"
 @using MySql.Data.MySqlClient;
 
 <PageTitle>Games Reviews - Games list</PageTitle>
@@ -119,7 +119,7 @@
                         <td>
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <span>@reviews</span>
-                                <NavLink href="@($"/ADDREVIEWPANEL/{logInEmail}&{logInPass}&{gameID}")" class="add-review-btn">Rate</NavLink>
+                                <NavLink href="@($"/ADDREVIEWPANEL/{logInEmail}&{logInPass}&{gameID}${logInID}")" class="add-review-btn">Rate</NavLink>
                             </div>
                         </td>
                     </tr>
@@ -132,10 +132,10 @@
     }
     else
     {
-        <h1> YOU ARE TOO YOUNG!</h1>
+        <h1 align="center">YOU ARE TOO YOUNG!</h1>
     }
 
-    <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}")" class="menu-button back-btn">back</NavLink>
+    <NavLink href="@($"/SIGNEDIN/{logInEmail}&{logInPass}${logInID}")" class="menu-button back-btn">back</NavLink>
 </div>
 
 @code {
@@ -155,6 +155,7 @@
 
     [Parameter] public string logInEmail { get; set; }
     [Parameter] public string logInPass { get; set; }
+    [Parameter] public string logInID { get; set; }
 
     protected override void OnInitialized()
     {
