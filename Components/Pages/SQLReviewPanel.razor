@@ -103,7 +103,7 @@
     MySqlCommand cmd = new MySqlCommand();
     MySqlDataReader reader;
 
-    int userReview = 0;
+    int userReview = 10;
     int reviewsAmount;
     double reviewSum;
     double lastRevVal;
@@ -134,14 +134,16 @@
     {
         string finalReview;
         if (userReview >= 0 && userReview <= 10)
-        reviewSum = lastRevVal * reviewsAmount;
-        reviewsAmount++;
-        reviewSum = reviewSum + userReview;
-        finalReview = $"{(reviewSum / reviewsAmount):0.##}";
-        cmd.CommandText = $"UPDATE `classproject`.`games` SET `gameReview` = '{finalReview}' WHERE (`gameID` = '{int.Parse(gameID)}');";
-        cmd.ExecuteNonQuery();
-        cmd.CommandText = $"UPDATE `classproject`.`games` SET `reviewsAmount` = '{reviewsAmount}' WHERE (`gameID` = '{int.Parse(gameID)}');";
-        cmd.ExecuteNonQuery();
-        reviewed = true;
+        {
+            reviewSum = lastRevVal * reviewsAmount;
+            reviewsAmount++;
+            reviewSum = reviewSum + userReview;
+            finalReview = $"{(reviewSum / reviewsAmount):0.##}";
+            cmd.CommandText = $"UPDATE `classproject`.`games` SET `gameReview` = '{finalReview}' WHERE (`gameID` = '{int.Parse(gameID)}');";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = $"UPDATE `classproject`.`games` SET `reviewsAmount` = '{reviewsAmount}' WHERE (`gameID` = '{int.Parse(gameID)}');";
+            cmd.ExecuteNonQuery();
+            reviewed = true;
+        }
     }
 }
